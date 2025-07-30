@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeDex Quiz</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="streak-container">
+        <p id="daily-streak">Daily Streak: 0</p>
+        <p id="correct-streak">Correct Streak: 0</p>
+    </div>    
+    <div id="main-container">
+        <h1>PokeDex Quiz</h1>
+        <div id="dex-entry">
+            <p id="dex-paragraph"><%- dexEntry %></p>
+            <div id="results-container">
+                <h2 id="pokemon-name" style="display: none;"></h2>
+                <img id="pokemon-image" src="" alt="Pokemon Image">
+                <p id="result-message"></p>
+            </div>
+            <div id="next-arrow" style="display: none; cursor: pointer; font-size: 2rem; text-align: center;" onclick="loadNextQuestion()">
+                <img src="arrow.png">
+            </div>
+        </div>        
+
+        <div id="answer-container">
+            <% answerChoices.forEach((answer, index) => { %>
+                <div class="answers" id="answer-<%= index %>" data-name="<%= answer.toLowerCase() %>" onclick="checkAnswer(this, '<%= answer.toLowerCase() %>')">
+                    <%= answer %>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <script>
+        let correctAnswer = "<%= correctAnswer %>";
+        let pokemonImageUrl = "<%= imageUrl %>";
+        let hasAnswered = false;
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            checkEntryLimit();
+            updateStreakDisplay();
+        });
+        
+        function checkEntryLimit() {
+            const today = new Date().toISOString().split("T")[0];
+            const storedDate = localStorage.getItem("quizDate");
+            const count = parseInt(localStorage.getItem("entryCount") || "0");
+        
+            if (storedDate !== today) {
+                // New day: reset count and streak
+                if (count < 6 && storedDate) {
+                    localStorage.setItem("dailyStreak", "0"); // missed a full day
+                    localStorage.setItem("correctStreak", "0");
+                }
+                localStorage.setItem("quizDate", today);
+                localStorage.setItem("entryCount", "0");
+            }
+        
+            if (count >= 6) {
+                disableQuiz("You've reached your daily limit of 10 Pokedex entries. Come back again tomorrow!");
+            }
+        }
+        
+        function disableQuiz(message) {
+            document.getElementById("answer-container").innerHTML = `<p style="font-family: 'Courier New'; font-size: 1.5rem; text-align: center;">${message}</p>`;
+            document.getElementById("dex-paragraph").innerText = "";
+            document.getElementById("next-arrow").style.display = "none";
+        }
+        
+        function updateStreakDisplay() {
+            const daily = localStorage.getItem("dailyStreak") || "0";
+            const correct = localStorage.getItem("correctStreak") || "0";
+            document.getElementById("daily-streak").innerText = `Daily Streak: ${daily}`;
+            document.getElementById("correct-streak").innerText = `Correct Streak: ${correct}`;
+        }
+        
+        async function loadNextQuestion() {
+            const count = parseInt(localStorage.getItem("entryCount") || "0");
+            if (count >= 6) {
+                disableQuiz("You've reached your daily limit of 10 Pokedex entries. Come back again tomorrow!");
+                return;
+            }
+        
+            try {
+                const response = await fetch("/api/entry");
+                const data = await response.json();
+        
+                document.getElementById("dex-paragraph").innerHTML = data.entryText;
+                document.getElementById("pokemon-name").style.display = "none";
+                document.getElementById("pokemon-image").style.display = "none";
+                document.getElementById("result-message").innerText = "";
+                document.getElementById("next-arrow").style.display = "none";
+        
+                const answerContainer = document.getElementById("answer-container");
+                answerContainer.innerHTML = "";
+        
+                data.answerChoices.forEach((answer, index) => {
+                    const div = document.createElement("div");
+                    div.className = "answers";
+                    div.id = `answer-${index}`;
+                    div.innerText = answer;
+                    div.onclick = () => checkAnswer(div, answer, data.correctPokemon, data.imageUrl);
+                    answerContainer.appendChild(div);
+                });
+        
+                correctAnswer = data.correctPokemon;
+                pokemonImageUrl = data.imageUrl;
+                hasAnswered = false;
+        
+            } catch (error) {
+                console.error("Error loading new dex entry:", error);
+            }
+        }
+        
+        function checkAnswer(selectedDiv, selectedAnswer, currentCorrectAnswer = correctAnswer, currentImageUrl = pokemonImageUrl) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+        
+            document.getElementById("pokemon-name").innerText = currentCorrectAnswer;
+            document.getElementById("pokemon-name").style.display = "block";
+            document.getElementById("pokemon-image").src = currentImageUrl;
+            document.getElementById("pokemon-image").style.display = "block";
+        
+            const isCorrect = selectedAnswer === currentCorrectAnswer;
+        
+            document.getElementById("result-message").innerText = isCorrect ? "Correct!" : "Wrong!";
+            document.getElementById("result-message").style.color = isCorrect ? "green" : "red";
+        
+            document.querySelectorAll(".answers").forEach(div => {
+                if (div.innerText === currentCorrectAnswer) {
+                    div.classList.add("correct");
+                } else {
+                    div.classList.add("wrong");
+                }
+                div.style.pointerEvents = "none";
+            });
+        
+            document.querySelectorAll(".hide-name").forEach(span => {
+                span.style.color = "inherit";
+                span.style.backgroundColor = "transparent";
+            });
+        
+            document.getElementById("next-arrow").style.display = "block";
+        
+            // Update streak and count
+            if (isCorrect) {
+                let streak = parseInt(localStorage.getItem("correctStreak") || "0");
+                localStorage.setItem("correctStreak", (streak + 1).toString());
+            } else {
+                localStorage.setItem("correctStreak", "0");
+            }
+        
+            let count = parseInt(localStorage.getItem("entryCount") || "0") + 1;
+            localStorage.setItem("entryCount", count.toString());
+        
+            // Update daily streak only if 6 are answered correctly today
+            if (count === 6) {
+                const today = new Date().toISOString().split("T")[0];
+                const storedDate = localStorage.getItem("quizDate");
+        
+                if (storedDate === today) {
+                    let daily = parseInt(localStorage.getItem("dailyStreak") || "0");
+                    localStorage.setItem("dailyStreak", (daily + 1).toString());
+                }
+            }
+        
+            updateStreakDisplay();
+        }
+        </script>            
+</body>
+</html>

@@ -1,0 +1,180 @@
+@font-face {
+    font-family: Pixel;
+    src: url(Pixel.ttf);
+}
+body {
+    background-image: url(pokedex2.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+#main-container {
+    display: grid;
+    grid-template-rows: auto auto auto auto ;
+    grid-template-columns: auto;
+}
+
+h1 {
+    color: rgb(241, 239, 78);
+    text-shadow: 4px 2px 4px black;
+    font-size: 8vw;
+    justify-self: center;
+    margin: auto;
+    font-family: Pixel;
+}
+
+#dex-entry {
+    background-color: rgba(245, 245, 245, 0.418);
+    box-shadow: inset 0 0 0 6px black;
+    border-radius: 16px;
+    position: relative; /* Needed for absolute positioning */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: fit-content;
+}
+
+#dex-paragraph {
+    height: fit-content;
+    text-align: center;
+    font-size: 2vw;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 450;
+}
+
+#pokemon-image {
+    display: none;
+    width: 14vw;
+}
+
+#next-arrow {
+    opacity: 0.418;
+    display: none;
+    position: absolute; /* Absolute positioning */
+    right: 20px; /* Align to the right */
+    cursor: pointer;
+
+}
+
+#next-arrow:active {
+    opacity: 10;
+}
+
+#results-container {
+    align-self: center; /* Centers it horizontally */
+    margin-top: 10px; /* Adds spacing below the paragraph */
+    text-align: center;
+    justify-self: center;
+    height: fit-content;
+    width: fit-content;
+}
+
+#pokemon-name {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+#result-message {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+#answer-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    height: 18vw;
+}
+
+.answers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 4vw;
+    font-weight: 450;
+    border: 6px solid black;
+    border-radius: 16px;
+    width: 48%;
+    margin: 8px;
+    height: 6vw;
+}
+
+.answers:hover {
+    cursor: pointer;
+}
+
+.answers:active {
+    background-color: rgba(255, 255, 255, 0.418);
+}
+
+.correct {
+    background-color: rgba(0, 173, 0, 0.418);
+}
+
+.wrong {
+    background-color: rgba(255, 28, 28, 0.418);
+}
+
+.hide-name {
+    background-color: black;
+    color: black;
+    border-radius: 4px;
+    padding: 0 4px;
+    transition: all 0.3s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none
+}
+
+#streak-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    text-align: right;
+    font-family: Pixel;
+    font-size: 1vw;
+    color: #222;
+    background-color: rgba(255, 255, 255, 0.418);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+@media screen and (max-width: 600px) {
+    body {
+        background-image: url(pokedex-phone.jpg);
+        background-size: fill;
+    }
+    
+    h1 {
+        font-size: 48px;
+    }
+
+    #streak-container {
+        font-size: 8px;
+        padding: 2px;
+    }
+
+    #dex-entry {
+        height: fit-content;
+        box-shadow: inset 0 0 0 2px black;
+    }
+
+    #dex-paragraph {
+        font-size: 20px;
+    }
+
+    #pokemon-image {
+        width: 140px;
+    }
+
+    .answers {
+        border: 2px solid black;
+        width: 84%;
+        font-size: 30px;
+    }
+}
