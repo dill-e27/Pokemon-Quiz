@@ -175,6 +175,8 @@ h1 {
     .answers {
         border: 2px solid black;
         width: 84%;
-        font-size: 30px;
+        min-height: 60px;
+        font-size: 40px;
     }
+
 }
